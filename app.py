@@ -69,70 +69,21 @@ def get_members():
         
         return members_schema.jsonify(members), 200
 
-# @app.route('/members/<int:id>', methods=['PUT'])
-# def update_member(id):
-#     conn = connect_database()
-#     updated_member = request.get_json()
-#     errors = members_schema.validate(updated_member)
-
-#     if errors:
-#         conn.close()  # Close the connection before returning
-#         return jsonify(errors), 400  # Use 400 for validation errors
-
-#     cursor = conn.cursor()
-
-#     # Check if the member exists
-#     query = 'SELECT * FROM Members WHERE id=%s'
-#     cursor.execute(query, (id))
-#     member = cursor.fetchone()
-    
-#     if member:
-#         updated_member_details = (updated_member['id'], updated_member['name'], updated_member['age'])
-        
-#         query = '''
-#             UPDATE Members
-#             SET
-#                 id = %s,
-#                 name = %s,
-#                 age = %s
-#             WHERE id = %s
-#         '''
-#         cursor.execute(query, (updated_member_details, id))  # Include member_id in the parameters
-                
-#         conn.commit()
-        
-#         # Close resources before returning
-#         cursor.close()
-#         conn.close()
-        
-#         return jsonify({'message': f'{updated_member["name"]} has been updated!'}), 200
-#     else:
-#         # Close resources before returning
-#         cursor.close()
-#         conn.close()
-        
-#         return jsonify({'message': 'Member not found!'}), 404  # Use 404 for not found
-
-
-
 @app.route('/members/<int:id>', methods=['PUT'])
 def update_member(id):
     try:
-        # Validate input data using the schema
         member_info = member_schema.load(request.json, partial=True)
     except ValidationError as e:
         print(f'Validation Error: {e}')
         return jsonify(e.messages), 400
     
     try:
-        # Connect to the database
         conn = connect_database()
         if conn is None:
             return jsonify({'error': 'Database connection failed'}), 500
 
         cursor = conn.cursor()
 
-        # Prepare the updated member data, assuming 'id' in member_info is the primary key
         updated_member = (member_info['age'], member_info['name'], id)
 
         query = '''
